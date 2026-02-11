@@ -1,0 +1,10 @@
+scenario,n_methods,spearman_vs_overlap_rank,spearman_vs_raw_rank,max_abs_rank_shift_vs_overlap
+adversarial_150pct,15,1.0,0.9964285714285712,0.0
+adversarial_half,15,1.0,0.9964285714285712,0.0
+beta_ci_high,15,1.0,0.9964285714285712,0.0
+beta_ci_low,15,1.0,0.9964285714285712,0.0
+conservative_min,15,1.0,0.9964285714285712,0.0
+mapping_max,9,0.5,0.5,11.0
+mapping_min,9,0.5499999999999999,0.5499999999999999,10.0
+optimistic_max,15,1.0,0.9964285714285712,0.0
+overlap_point,15,1.0,0.9964285714285712,0.0

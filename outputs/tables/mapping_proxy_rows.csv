@@ -1,0 +1,8 @@
+proxy_kind,proxy_source,reference,coverage_proxy,support_num,support_den,missing_total,total_edges_normalized
+mapping_endpoint,probe_priors,hpn_dream,0.04956896551724138,23.0,464.0,441.0,232.0
+mapping_endpoint,probe_priors,beeline_gsd,0.05921052631578947,9.0,152.0,143.0,76.0
+mapping_endpoint,probe_priors_full_genes,hpn_dream,1.0,464.0,464.0,0.0,232.0
+mapping_endpoint,probe_priors_full_genes_crosswalk,hpn_dream,1.0,464.0,464.0,0.0,232.0
+mapping_endpoint,probe_priors_full_genes_crosswalk,beeline_gsd,0.8026315789473685,122.0,152.0,30.0,76.0
+mapping_endpoint,probe_priors_full_genes_omnipath,hpn_dream,1.0,464.0,464.0,0.0,232.0
+mapping_endpoint,probe_priors_full_genes_omnipath,omnipath_interactions,0.9947795091792316,63073.0,63404.0,331.0,31702.0

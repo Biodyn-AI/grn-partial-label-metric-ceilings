@@ -1,0 +1,7 @@
+target_metric,candidate_confound,n_rows,pearson_r,spearman_r
+aupr_ratio,candidate_edges,39,0.039702080845677085,-0.35542731432288377
+aupr_ratio,coverage_scenario_c,39,-0.5322283182803501,-0.9221579337996485
+aupr_ratio,observed_base_rate,39,0.7380931878767312,0.950102113611759
+aupr_uplift_ratio,candidate_edges,39,0.15323286412603923,0.3356813524160569
+aupr_uplift_ratio,coverage_scenario_c,39,-0.06350204374327412,0.7166129667372353
+aupr_uplift_ratio,observed_base_rate,39,0.1461819895160873,-0.6787330785474854
