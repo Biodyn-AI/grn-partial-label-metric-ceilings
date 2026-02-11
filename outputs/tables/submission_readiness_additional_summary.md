@@ -36,6 +36,13 @@
 | aupr_uplift_ratio | coverage_scenario_c  |       39 |  -0.063502  |     0.716613 |
 | aupr_uplift_ratio | observed_base_rate   |       39 |   0.146182  |    -0.678733 |
 
+## Family-level significance diagnostics
+| family_a      | family_b     |   n_a |   n_b |   median_aupr_ratio_a |   median_aupr_ratio_b |   median_diff_a_minus_b |   cliffs_delta_aupr_ratio |   perm_p_two_sided_median_diff |   positive_uplift_a |   positive_uplift_b |   positive_uplift_fraction_a |   positive_uplift_fraction_b |   fisher_p_two_sided_positive_uplift |   bh_q_perm_median_diff |
+|:--------------|:-------------|------:|------:|----------------------:|----------------------:|------------------------:|--------------------------:|-------------------------------:|--------------------:|--------------------:|-----------------------------:|-----------------------------:|-------------------------------------:|------------------------:|
+| classical_grn | probe_family |    21 |    12 |           4.00017e-06 |           0.00128848  |            -0.00128448  |                 -0.412698 |                       0.19998  |                   2 |                   1 |                    0.0952381 |                    0.0833333 |                                    1 |                0.59994  |
+| control       | probe_family |     6 |    12 |           3.99957e-06 |           0.00128848  |            -0.00128448  |                 -0.555556 |                       0.406059 |                   0 |                   1 |                    0         |                    0.0833333 |                                    1 |                0.609089 |
+| classical_grn | control      |    21 |     6 |           4.00017e-06 |           3.99957e-06 |             5.98312e-10 |                  0.15873  |                       0.686631 |                   2 |                   0 |                    0.0952381 |                    0         |                                    1 |                0.686631 |
+
 ## External time-series reinterpretation constants
 - HPN random AUPR baseline: `3.013954e-06`
 - BEELINE random AUPR baseline: `1.236963e-06`

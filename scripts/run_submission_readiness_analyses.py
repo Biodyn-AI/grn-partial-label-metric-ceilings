@@ -10,6 +10,7 @@ This script augments Proposal 1 outputs with:
 from __future__ import annotations
 
 import json
+import math
 from pathlib import Path
 from typing import Callable
 
@@ -80,6 +81,79 @@ def method_class(name: str) -> str:
     if name in {"random", "random_3950", "scenic_pruned"}:
         return "control"
     return "classical_grn"
+
+
+def cliffs_delta(x: np.ndarray, y: np.ndarray) -> float:
+    """Compute Cliff's delta effect size for two independent samples."""
+    x = np.asarray(x, dtype=float)
+    y = np.asarray(y, dtype=float)
+    if len(x) == 0 or len(y) == 0:
+        return np.nan
+    gt = 0
+    lt = 0
+    for xi in x:
+        gt += int(np.sum(xi > y))
+        lt += int(np.sum(xi < y))
+    return (gt - lt) / float(len(x) * len(y))
+
+
+def permutation_pvalue_diff_in_medians(
+    x: np.ndarray, y: np.ndarray, rng: np.random.Generator, n_perm: int = 10000
+) -> float:
+    """Two-sided permutation p-value for difference in medians."""
+    x = np.asarray(x, dtype=float)
+    y = np.asarray(y, dtype=float)
+    if len(x) == 0 or len(y) == 0:
+        return np.nan
+
+    observed = float(np.median(x) - np.median(y))
+    pooled = np.concatenate([x, y])
+    n_x = len(x)
+    extreme = 0
+    for _ in range(n_perm):
+        perm = rng.permutation(pooled)
+        x_p = perm[:n_x]
+        y_p = perm[n_x:]
+        stat = float(np.median(x_p) - np.median(y_p))
+        if abs(stat) >= abs(observed):
+            extreme += 1
+    # Add-one smoothing for finite permutation runs.
+    return (extreme + 1) / float(n_perm + 1)
+
+
+def combination(n: int, k: int) -> int:
+    """Safe integer n-choose-k."""
+    if k < 0 or k > n:
+        return 0
+    return math.comb(n, k)
+
+
+def fisher_exact_two_sided(a: int, b: int, c: int, d: int) -> float:
+    """Compute two-sided Fisher exact p-value for a 2x2 table.
+
+    Table layout:
+        [[a, b],
+         [c, d]]
+    """
+    row1 = a + b
+    row2 = c + d
+    col1 = a + c
+    n = row1 + row2
+
+    def hypergeom_prob(x: int) -> float:
+        return (
+            combination(col1, x) * combination(n - col1, row1 - x) / combination(n, row1)
+        )
+
+    x_min = max(0, row1 - (n - col1))
+    x_max = min(row1, col1)
+    p_obs = hypergeom_prob(a)
+    p_two = 0.0
+    for x in range(x_min, x_max + 1):
+        p = hypergeom_prob(x)
+        if p <= p_obs + 1e-12:
+            p_two += p
+    return min(1.0, p_two)
 
 
 def build_bootstrap_tables(central: pd.DataFrame, out_dir: Path, rng: np.random.Generator) -> pd.DataFrame:
@@ -160,6 +234,71 @@ def build_family_table(central: pd.DataFrame, out_dir: Path) -> pd.DataFrame:
         .sort_values("median_aupr_ratio", ascending=False)
     )
     out.to_csv(out_dir / "family_comparison_central.csv", index=False)
+    return out
+
+
+def build_family_significance_table(
+    central: pd.DataFrame, out_dir: Path, rng: np.random.Generator
+) -> pd.DataFrame:
+    """Compute pairwise family-difference significance diagnostics."""
+    df = central.copy()
+    df["method_family"] = df["method"].map(method_class)
+    families = sorted(df["method_family"].unique())
+
+    rows = []
+    for i, fam_a in enumerate(families):
+        for fam_b in families[i + 1 :]:
+            a = df[df["method_family"] == fam_a]
+            b = df[df["method_family"] == fam_b]
+
+            aupr_a = a["aupr_ratio"].to_numpy(dtype=float)
+            aupr_b = b["aupr_ratio"].to_numpy(dtype=float)
+            p_perm = permutation_pvalue_diff_in_medians(aupr_a, aupr_b, rng=rng, n_perm=10000)
+            delta = cliffs_delta(aupr_a, aupr_b)
+
+            a_pos = int((a["aupr_uplift_ratio"] > 0).sum())
+            a_neg = int(len(a) - a_pos)
+            b_pos = int((b["aupr_uplift_ratio"] > 0).sum())
+            b_neg = int(len(b) - b_pos)
+            p_fisher = fisher_exact_two_sided(a_pos, a_neg, b_pos, b_neg)
+
+            rows.append(
+                {
+                    "family_a": fam_a,
+                    "family_b": fam_b,
+                    "n_a": len(a),
+                    "n_b": len(b),
+                    "median_aupr_ratio_a": float(np.median(aupr_a)),
+                    "median_aupr_ratio_b": float(np.median(aupr_b)),
+                    "median_diff_a_minus_b": float(np.median(aupr_a) - np.median(aupr_b)),
+                    "cliffs_delta_aupr_ratio": float(delta),
+                    "perm_p_two_sided_median_diff": float(p_perm),
+                    "positive_uplift_a": a_pos,
+                    "positive_uplift_b": b_pos,
+                    "positive_uplift_fraction_a": float(a_pos / len(a)),
+                    "positive_uplift_fraction_b": float(b_pos / len(b)),
+                    "fisher_p_two_sided_positive_uplift": float(p_fisher),
+                }
+            )
+
+    out = pd.DataFrame(rows).sort_values("perm_p_two_sided_median_diff")
+    # Benjamini-Hochberg correction across pairwise AUPR median-difference tests.
+    m = len(out)
+    if m > 0:
+        order = np.argsort(out["perm_p_two_sided_median_diff"].to_numpy())
+        ranked = np.empty(m, dtype=float)
+        p_sorted = out["perm_p_two_sided_median_diff"].to_numpy()[order]
+        prev = 1.0
+        for idx in range(m - 1, -1, -1):
+            rank = idx + 1
+            q = min(prev, p_sorted[idx] * m / rank)
+            ranked[idx] = q
+            prev = q
+        qvals = np.empty(m, dtype=float)
+        qvals[order] = ranked
+        out["bh_q_perm_median_diff"] = qvals
+
+    out.to_csv(out_dir / "family_significance_tests.csv", index=False)
     return out
 
 
@@ -505,6 +644,7 @@ def write_submission_summary(
     reference_uplift: pd.DataFrame,
     family: pd.DataFrame,
     confounds: pd.DataFrame,
+    family_significance: pd.DataFrame,
     timeseries_family: pd.DataFrame,
     perturbation_summary: pd.DataFrame,
     concordance: pd.DataFrame,
@@ -528,6 +668,9 @@ def write_submission_summary(
         "",
         "## Confound checks (correlation diagnostics)",
         confounds.to_markdown(index=False),
+        "",
+        "## Family-level significance diagnostics",
+        family_significance.to_markdown(index=False),
         "",
         "## External time-series reinterpretation constants",
         f"- HPN random AUPR baseline: `{ts_c['hpn_random_aupr_baseline']:.6e}`",
@@ -573,6 +716,7 @@ def main() -> None:
     bootstrap = build_bootstrap_tables(central, tables_dir, rng)
     reference_uplift = build_reference_uplift_table(central, tables_dir)
     family = build_family_table(central, tables_dir)
+    family_significance = build_family_significance_table(central, tables_dir, rng)
     confounds = build_confound_checks(central, tables_dir)
     timeseries, timeseries_family, ts_constants = build_timeseries_tables(repo_root, coverage, tables_dir)
     perturbation_summary, perturbation_top = build_perturbation_tables(repo_root, tables_dir)
@@ -588,6 +732,7 @@ def main() -> None:
         reference_uplift=reference_uplift,
         family=family,
         confounds=confounds,
+        family_significance=family_significance,
         timeseries_family=timeseries_family,
         perturbation_summary=perturbation_summary,
         concordance=concordance,
