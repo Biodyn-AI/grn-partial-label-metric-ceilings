@@ -144,7 +144,7 @@ Partial-label ceiling correction is necessary but not sufficient for trustworthy
 ## 9. Data and Code Availability
 All code, analysis scripts, figure-generation pipelines, and configuration files are provided at:
 
-[https://github.com/Biodyn-AI/grn-partial-label-metric-ceilings](https://github.com/Biodyn-AI/grn-partial-label-metric-ceilings)
+[https://anonymous.4open.science/r/grn-partial-label-metric-ceilings](https://anonymous.4open.science/r/grn-partial-label-metric-ceilings)
 
 The repository README contains complete instructions to reproduce all main figures, tables, and supplementary analyses, along with dataset access notes.
 

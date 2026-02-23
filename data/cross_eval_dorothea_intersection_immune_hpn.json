@@ -1,0 +1,12 @@
+{
+  "candidate_edges": 29253,
+  "config": "configs/omnipath_signaling_dorothea_intersection_immune_hpn.yaml",
+  "hpn": {
+    "aupr": 0.003731561157628521,
+    "positives": 23
+  },
+  "beeline": {
+    "aupr": 0.00028895313429252187,
+    "positives": 13
+  }
+}

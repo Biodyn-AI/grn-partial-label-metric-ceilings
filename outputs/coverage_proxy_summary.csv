@@ -1,0 +1,13 @@
+proxy_kind,proxy_source,reference,total_edges_normalized,missing_total,support_num,support_den,coverage_proxy_c
+mapping_endpoint,probe_priors,hpn_dream,232.0,441.0,23.0,464.0,0.049568965517241326
+mapping_endpoint,probe_priors,beeline_gsd,76.0,143.0,9.0,152.0,0.05921052631578949
+mapping_endpoint,probe_priors_full_genes,hpn_dream,232.0,0.0,464.0,464.0,1.0
+mapping_endpoint,probe_priors_full_genes_crosswalk,hpn_dream,232.0,0.0,464.0,464.0,1.0
+mapping_endpoint,probe_priors_full_genes_crosswalk,beeline_gsd,76.0,30.0,122.0,152.0,0.8026315789473684
+mapping_endpoint,probe_priors_full_genes_omnipath,hpn_dream,232.0,0.0,464.0,464.0,1.0
+mapping_endpoint,probe_priors_full_genes_omnipath,omnipath_interactions,31702.0,331.0,63073.0,63404.0,0.9947795091792316
+overlap_node,probe_priors,dorothea_human,,,1743.0,18352.0,0.09497602441150828
+overlap_node,probe_priors,trrust_human,,,451.0,2836.0,0.15902679830747532
+overlap_node,grn_baselines_immune,hpn_dream,,,38.0,51.0,0.7450980392156863
+overlap_node,grn_baselines_immune,beeline_gsd,,,15.0,17.0,0.8823529411764706
+overlap_node,grn_baselines_immune,dorothea_trrust_union_immune,,,2089.0,17731.0,0.11781625401838587

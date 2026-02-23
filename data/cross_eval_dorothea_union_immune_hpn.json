@@ -1,0 +1,32 @@
+{
+  "candidate_edges": 870806,
+  "union_config": "configs/omnipath_signaling_dorothea_union_immune_hpn.yaml",
+  "hpn": {
+    "raw": {
+      "aupr": 0.0006744426720532492,
+      "brier": 0.00014561409537918628
+    },
+    "isotonic": {
+      "aupr": 0.000645292354804636,
+      "brier": 0.00014201264337781094
+    },
+    "logistic": {
+      "aupr": 0.0006744426720532492,
+      "brier": 0.00014178224315571157
+    }
+  },
+  "beeline": {
+    "raw": {
+      "aupr": 2.6544377997009007e-05,
+      "brier": 5.0189976398678066e-05
+    },
+    "isotonic": {
+      "aupr": 2.6022188017374645e-05,
+      "brier": 4.586671825025734e-05
+    },
+    "logistic": {
+      "aupr": 2.6544377997009007e-05,
+      "brier": 4.5490698299514214e-05
+    }
+  }
+}

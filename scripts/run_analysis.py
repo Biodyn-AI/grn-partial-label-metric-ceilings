@@ -1,8 +1,7 @@
 #!/usr/bin/env python3
-"""Proposal 1: Partial-label metric ceiling analysis.
+"""Partial-label metric ceiling analysis.
 
-This script executes a low-compute analysis for Proposal 1 in
-`theory_first_low_compute_proposals.md` by:
+This script executes the initial ceiling analysis by:
 1. Deriving metric ceiling quantities from partial-label assumptions.
 2. Estimating coverage proxies from existing mapping and overlap reports.
 3. Re-interpreting observed F1/AUPR values as fractions of estimated ceilings.
@@ -28,15 +27,15 @@ BETA_SAMPLES = 12000
 
 
 METRIC_TABLES = {
-    "probe_priors": "network_inference/outputs/score_eval_probe_priors.csv",
-    "grn_baselines_immune": "network_inference/outputs/score_eval_grn_baselines_immune.csv",
+    "probe_priors": "data/score_eval_probe_priors.csv",
+    "grn_baselines_immune": "data/score_eval_grn_baselines_immune.csv",
 }
 
 MAPPING_REPORTS = {
-    "probe_priors": "network_inference/outputs/score_eval_probe_priors_missing_report.json",
-    "probe_priors_full_genes": "network_inference/outputs/score_eval_probe_priors_full_genes_missing_report.json",
-    "probe_priors_full_genes_crosswalk": "network_inference/outputs/score_eval_probe_priors_full_genes_crosswalk_missing_report.json",
-    "probe_priors_full_genes_omnipath": "network_inference/outputs/score_eval_probe_priors_full_genes_omnipath_missing_report.json",
+    "probe_priors": "data/score_eval_probe_priors_missing_report.json",
+    "probe_priors_full_genes": "data/score_eval_probe_priors_full_genes_missing_report.json",
+    "probe_priors_full_genes_crosswalk": "data/score_eval_probe_priors_full_genes_crosswalk_missing_report.json",
+    "probe_priors_full_genes_omnipath": "data/score_eval_probe_priors_full_genes_omnipath_missing_report.json",
 }
 
 
@@ -49,7 +48,7 @@ class CoveragePosterior:
 def find_repo_root(start: Path) -> Path:
     """Find repository root by walking up to directory with known top-level folders."""
     for candidate in [start] + list(start.parents):
-        if (candidate / "market_research").exists() and (candidate / "network_inference").exists():
+        if (candidate / "data").exists() and (candidate / "scripts").exists():
             return candidate
     raise RuntimeError("Could not infer repository root from script location.")
 
@@ -376,7 +375,7 @@ def plot_observed_vs_ceiling_ratio(rows: pd.DataFrame, output_path: Path) -> Non
         for ref, color in colors.items()
     ]
     fig.legend(handles=legend_handles, loc="lower center", ncol=min(len(legend_handles), 4))
-    fig.suptitle("Proposal 1: Observed Metrics Relative to Partial-Label Ceilings", y=1.02)
+    fig.suptitle("Observed Metrics Relative to Partial-Label Ceilings", y=1.02)
     fig.tight_layout(rect=[0, 0.08, 1, 1])
     output_path.parent.mkdir(parents=True, exist_ok=True)
     fig.savefig(output_path)
@@ -427,7 +426,7 @@ def plot_theoretical_curves(rows: pd.DataFrame, output_path: Path) -> None:
 def main() -> None:
     script_path = Path(__file__).resolve()
     repo_root = find_repo_root(script_path)
-    output_dir = script_path.parent.parent / "outputs"
+    output_dir = repo_root / "outputs"
     figures_dir = output_dir / "figures"
 
     rng = np.random.default_rng(RNG_SEED)

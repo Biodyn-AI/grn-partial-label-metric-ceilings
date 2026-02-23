@@ -1,15 +1,14 @@
 #!/usr/bin/env python3
-"""Full paper pipeline for Proposal 1: Partial-label metric ceilings.
+"""Full paper pipeline: Partial-label metric ceilings.
 
-This script turns the initial Proposal 1 analysis into a research-grade artifact bundle:
+This script produces a research-grade artifact bundle:
 - formal ceiling calculations for F1/AUPR under partial positive labeling,
 - multi-scenario coverage sensitivity analysis,
 - adversarial robustness checks for coverage misspecification,
 - synthetic theorem-validation experiments (MAR + non-MAR labeling),
 - publication-ready figures/tables and an auto-generated results summary.
 
-All outputs are written under:
-`market_research/ambitious_paper_questions/proposal_01_partial_label_metric_ceilings/outputs/paper`
+All outputs are written under: outputs/paper/
 """
 
 from __future__ import annotations
@@ -36,38 +35,38 @@ SMALL = 1e-12
 
 # Main evaluation tables with AUPR + F1.
 PRIMARY_METRIC_TABLES = {
-    "probe_priors": "network_inference/outputs/score_eval_probe_priors.csv",
-    "grn_baselines_immune": "network_inference/outputs/score_eval_grn_baselines_immune.csv",
+    "probe_priors": "data/score_eval_probe_priors.csv",
+    "grn_baselines_immune": "data/score_eval_grn_baselines_immune.csv",
 }
 
 # Additional tables that provide F1 but missing AUPR (still useful for F1 ceiling analysis).
 F1_ONLY_TABLES = {
-    "probe_priors_full_genes": "network_inference/outputs/score_eval_probe_priors_full_genes.csv",
-    "probe_priors_full_genes_crosswalk": "network_inference/outputs/score_eval_probe_priors_full_genes_crosswalk.csv",
-    "probe_priors_full_genes_omnipath": "network_inference/outputs/score_eval_probe_priors_full_genes_omnipath.csv",
+    "probe_priors_full_genes": "data/score_eval_probe_priors_full_genes.csv",
+    "probe_priors_full_genes_crosswalk": "data/score_eval_probe_priors_full_genes_crosswalk.csv",
+    "probe_priors_full_genes_omnipath": "data/score_eval_probe_priors_full_genes_omnipath.csv",
 }
 
 # Mapping artifacts used as alternative (endpoint-level) coverage proxies.
 MAPPING_REPORTS = {
-    "probe_priors": "network_inference/outputs/score_eval_probe_priors_missing_report.json",
-    "probe_priors_full_genes": "network_inference/outputs/score_eval_probe_priors_full_genes_missing_report.json",
-    "probe_priors_full_genes_crosswalk": "network_inference/outputs/score_eval_probe_priors_full_genes_crosswalk_missing_report.json",
-    "probe_priors_full_genes_omnipath": "network_inference/outputs/score_eval_probe_priors_full_genes_omnipath_missing_report.json",
+    "probe_priors": "data/score_eval_probe_priors_missing_report.json",
+    "probe_priors_full_genes": "data/score_eval_probe_priors_full_genes_missing_report.json",
+    "probe_priors_full_genes_crosswalk": "data/score_eval_probe_priors_full_genes_crosswalk_missing_report.json",
+    "probe_priors_full_genes_omnipath": "data/score_eval_probe_priors_full_genes_omnipath_missing_report.json",
 }
 
 # Extra network-inference sweep and cross-eval artifacts for external sanity checks.
 SWEEP_JSONS = {
-    "omnipath": "network_inference/outputs/sweep_results_omnipath.json",
-    "omnipath_dorothea_union_immune_hpn": "network_inference/outputs/sweep_results_omnipath_dorothea_union_immune_hpn.json",
-    "omnipath_dorothea_intersection_immune_hpn": "network_inference/outputs/sweep_results_omnipath_dorothea_intersection_immune_hpn.json",
-    "regulatory": "network_inference/outputs/sweep_results_regulatory.json",
+    "omnipath": "data/sweep_results_omnipath.json",
+    "omnipath_dorothea_union_immune_hpn": "data/sweep_results_omnipath_dorothea_union_immune_hpn.json",
+    "omnipath_dorothea_intersection_immune_hpn": "data/sweep_results_omnipath_dorothea_intersection_immune_hpn.json",
+    "regulatory": "data/sweep_results_regulatory.json",
 }
 
 CROSS_EVAL_JSONS = {
-    "cross_union": "network_inference/outputs/cross_eval_dorothea_union_immune_hpn.json",
-    "cross_union_scaled": "network_inference/outputs/cross_eval_dorothea_union_immune_hpn_scaled.json",
-    "cross_intersection": "network_inference/outputs/cross_eval_dorothea_intersection_immune_hpn.json",
-    "cross_intersection_scaled": "network_inference/outputs/cross_eval_dorothea_intersection_immune_hpn_scaled.json",
+    "cross_union": "data/cross_eval_dorothea_union_immune_hpn.json",
+    "cross_union_scaled": "data/cross_eval_dorothea_union_immune_hpn_scaled.json",
+    "cross_intersection": "data/cross_eval_dorothea_intersection_immune_hpn.json",
+    "cross_intersection_scaled": "data/cross_eval_dorothea_intersection_immune_hpn_scaled.json",
 }
 
 
@@ -80,7 +79,7 @@ class CoveragePosterior:
 def find_repo_root(start: Path) -> Path:
     """Walk up directories until reaching repository root folders."""
     for candidate in [start] + list(start.parents):
-        if (candidate / "market_research").exists() and (candidate / "network_inference").exists():
+        if (candidate / "data").exists() and (candidate / "scripts").exists():
             return candidate
     raise RuntimeError("Could not detect repository root from script location.")
 
@@ -1108,7 +1107,7 @@ def build_results_summary_markdown(
     cross_snapshot = cross_snapshot.sort_values("aupr", ascending=False).head(6)
 
     lines: List[str] = []
-    lines.append("# Proposal 1 Full-Pipeline Results Summary")
+    lines.append("# Partial-label ceiling Full-Pipeline Results Summary")
     lines.append("")
     lines.append("## Core reinterpretation")
     lines.append(
@@ -1192,7 +1191,7 @@ def write_manuscript_template(
 Absolute GRN benchmark metrics are often interpreted without accounting for incomplete positive labels in reference networks. We formalize partial-label ceilings for observed precision, F1, and AUPR under missing-at-random positive labeling, derive finite-sample AUPR corrections, and show how uncertainty in coverage propagates to ceiling uncertainty. We then execute a low-compute empirical reinterpretation across existing GRN evaluation outputs and quantify robustness under adversarial coverage misspecification and non-MAR labeling stress tests. Across 39 evaluable rows from 15 methods and 5 references, observed scores remain small fractions of estimated ceilings (best F1 ratio 0.137, best AUPR ratio 0.0138; medians near zero). Synthetic validation confirms the MAR formulas are numerically tight, while non-MAR missingness can systematically perturb AUPR relative to MAR predictions. We provide a reproducible ceiling-aware reporting protocol that reduces benchmark overclaiming and underclaiming.
 
 ## 1. Introduction
-Evaluation in GRN inference is fundamentally limited by label incompleteness: curated references expose only a subset of latent true edges. This introduces an interpretation gap between observed and latent metrics. Proposal 1 in this research track asked a concrete question: given incomplete references, what is the best achievable observed F1/AUPR even for an ideal predictor?
+Evaluation in GRN inference is fundamentally limited by label incompleteness: curated references expose only a subset of latent true edges. This introduces an interpretation gap between observed and latent metrics. Partial-label ceiling in this research track asked a concrete question: given incomplete references, what is the best achievable observed F1/AUPR even for an ideal predictor?
 
 This work makes three contributions:
 1. A formal ceiling framework for observed F1/AUPR under partial labeling, with finite-sample corrections.
@@ -1238,19 +1237,19 @@ Ceiling intervals are propagated by Monte Carlo draws from this posterior.
 ## 4. Methods
 ### 4.1 Data artifacts
 Primary metric tables:
-- `network_inference/outputs/score_eval_probe_priors.csv`
-- `network_inference/outputs/score_eval_grn_baselines_immune.csv`
+- `data/score_eval_probe_priors.csv`
+- `data/score_eval_grn_baselines_immune.csv`
 
 F1-extended tables:
-- `network_inference/outputs/score_eval_probe_priors_full_genes.csv`
-- `network_inference/outputs/score_eval_probe_priors_full_genes_crosswalk.csv`
-- `network_inference/outputs/score_eval_probe_priors_full_genes_omnipath.csv`
+- `data/score_eval_probe_priors_full_genes.csv`
+- `data/score_eval_probe_priors_full_genes_crosswalk.csv`
+- `data/score_eval_probe_priors_full_genes_omnipath.csv`
 
 Coverage proxy artifacts:
-- `network_inference/outputs/score_eval_probe_priors_missing_report.json`
-- `network_inference/outputs/score_eval_probe_priors_full_genes_missing_report.json`
-- `network_inference/outputs/score_eval_probe_priors_full_genes_crosswalk_missing_report.json`
-- `network_inference/outputs/score_eval_probe_priors_full_genes_omnipath_missing_report.json`
+- `data/score_eval_probe_priors_missing_report.json`
+- `data/score_eval_probe_priors_full_genes_missing_report.json`
+- `data/score_eval_probe_priors_full_genes_crosswalk_missing_report.json`
+- `data/score_eval_probe_priors_full_genes_omnipath_missing_report.json`
 
 ### 4.2 Coverage scenarios
 Per reference, we evaluate multiple coverage scenarios:
@@ -1268,7 +1267,7 @@ Per reference, we evaluate multiple coverage scenarios:
 Single command:
 
 ```bash
-python market_research/ambitious_paper_questions/proposal_01_partial_label_metric_ceilings/scripts/run_proposal1_paper_pipeline.py
+python scripts/run_paper_pipeline.py
 ```
 
 ## 5. Results
@@ -1350,8 +1349,7 @@ def main() -> None:
     script_path = Path(__file__).resolve()
     repo_root = find_repo_root(script_path)
 
-    base_dir = script_path.parent.parent
-    output_dir = base_dir / "outputs" / "paper"
+    output_dir = repo_root / "outputs" / "paper"
     figures_dir = output_dir / "figures"
     tables_dir = output_dir / "tables"
 
@@ -1463,7 +1461,7 @@ def main() -> None:
     )
     (output_dir / "results_summary.md").write_text(summary_md)
 
-    paper_dir = base_dir / "paper"
+    paper_dir = repo_root / "paper"
     paper_dir.mkdir(parents=True, exist_ok=True)
     write_manuscript_template(paper_dir=paper_dir, summary_tables_dir=tables_dir, figures_dir=figures_dir)
 

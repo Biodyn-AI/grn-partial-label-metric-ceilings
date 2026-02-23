@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Build a finalized manuscript markdown from Proposal 1 pipeline outputs.
+"""Build a finalized manuscript markdown from Partial-label ceiling pipeline outputs.
 
 This script reads generated tables under outputs/paper/tables and writes a
 fully populated research paper draft with embedded statistics and tables.
@@ -15,7 +15,7 @@ import pandas as pd
 def find_repo_root(start: Path) -> Path:
     """Locate repository root from script path."""
     for candidate in [start] + list(start.parents):
-        if (candidate / "market_research").exists() and (candidate / "network_inference").exists():
+        if (candidate / "data").exists() and (candidate / "scripts").exists():
             return candidate
     raise RuntimeError("Could not infer repo root.")
 
@@ -24,9 +24,8 @@ def main() -> None:
     script = Path(__file__).resolve()
     repo_root = find_repo_root(script)
 
-    base_dir = repo_root / "market_research/ambitious_paper_questions/proposal_01_partial_label_metric_ceilings"
-    tables_dir = base_dir / "outputs/paper/tables"
-    figures_dir = base_dir / "outputs/paper/figures"
+    tables_dir = repo_root / "outputs/paper/tables"
+    figures_dir = repo_root / "outputs/paper/figures"
 
     central_aupr = pd.read_csv(tables_dir / "central_aupr_rows.csv")
     central_f1 = pd.read_csv(tables_dir / "central_f1_rows.csv")
@@ -183,7 +182,7 @@ def main() -> None:
     for col in ["observed_baserate", "aupr"]:
         cross_top[col] = cross_top[col].map(lambda x: float(f"{x:.6g}") if pd.notna(x) else x)
 
-    output_path = base_dir / "paper/proposal1_partial_label_metric_ceilings_FINAL.md"
+    output_path = repo_root / "paper/proposal1_partial_label_metric_ceilings_FINAL.md"
 
     manuscript = f"""# Partial-Label Metric Ceilings for GRN Evaluation
 ## A Theory-First, Adversarially Stress-Tested Study
@@ -192,7 +191,7 @@ def main() -> None:
 Gene regulatory network (GRN) benchmarks are usually interpreted as if labels were complete, but curated references are partial observations of latent biology. We formalize this partial-label regime and derive explicit ceilings for observed F1 and AUPR as functions of positive-label coverage `c`. We then execute a full low-compute analysis on existing benchmark artifacts, propagate uncertainty in `c`, and adversarially stress-test assumptions using non-MAR missingness simulations. Across `{aupr_rows_total}` AUPR-evaluable rows ({method_count} methods, {ref_count} references), the best ceiling-normalized scores are modest (best F1 ratio `{best_f1['f1_ratio']:.3f}`, best AUPR ratio `{best_aupr['aupr_ratio']:.4f}`), with medians near zero (F1 ratio `{median_f1_ratio:.6f}`, AUPR ratio `{median_aupr_ratio:.6f}`). MAR-theory simulations show low absolute bias (median F1 bias `{mar_bias_f1_median:.3e}`, median AUPR bias `{mar_bias_aupr_median:.3e}`), while non-MAR missingness can induce substantial AUPR deviations (optimistic labeling: +`{adv_mode_summary[adv_mode_summary['mode']=='optimistic']['aupr_delta_mean'].iloc[0]:.3f}`; pessimistic: `{adv_mode_summary[adv_mode_summary['mode']=='pessimistic']['aupr_delta_mean'].iloc[0]:.3f}` vs MAR theory). We provide a reproducible ceiling-aware reporting framework and a finalized artifact bundle.
 
 ## 1. Introduction
-Absolute benchmark metrics in GRN inference are hard to interpret under incomplete references. If only a fraction of true edges are labeled positive, observed precision-style metrics are systematically distorted, and even an ideal predictor can appear weak in absolute terms. This paper answers Proposal 1's central question directly: **what observed F1/AUPR is theoretically achievable under partial positive labels, and how far are current results from that ceiling?**
+Absolute benchmark metrics in GRN inference are hard to interpret under incomplete references. If only a fraction of true edges are labeled positive, observed precision-style metrics are systematically distorted, and even an ideal predictor can appear weak in absolute terms. This paper answers the study's central question directly: **what observed F1/AUPR is theoretically achievable under partial positive labels, and how far are current results from that ceiling?**
 
 We contribute:
 1. Closed-form ceiling formulas for observed precision/F1/AUPR under a missing-at-random (MAR) positive-label model.
@@ -244,19 +243,19 @@ with overlap support `k` and denominator `n`, then propagate uncertainty by Mont
 
 ## 4. Data and Protocol
 ### 4.1 Primary artifacts
-- `network_inference/outputs/score_eval_probe_priors.csv`
-- `network_inference/outputs/score_eval_grn_baselines_immune.csv`
+- `data/score_eval_probe_priors.csv`
+- `data/score_eval_grn_baselines_immune.csv`
 
 ### 4.2 F1-extended artifacts
-- `network_inference/outputs/score_eval_probe_priors_full_genes.csv`
-- `network_inference/outputs/score_eval_probe_priors_full_genes_crosswalk.csv`
-- `network_inference/outputs/score_eval_probe_priors_full_genes_omnipath.csv`
+- `data/score_eval_probe_priors_full_genes.csv`
+- `data/score_eval_probe_priors_full_genes_crosswalk.csv`
+- `data/score_eval_probe_priors_full_genes_omnipath.csv`
 
 ### 4.3 Coverage proxy artifacts
-- `network_inference/outputs/score_eval_probe_priors_missing_report.json`
-- `network_inference/outputs/score_eval_probe_priors_full_genes_missing_report.json`
-- `network_inference/outputs/score_eval_probe_priors_full_genes_crosswalk_missing_report.json`
-- `network_inference/outputs/score_eval_probe_priors_full_genes_omnipath_missing_report.json`
+- `data/score_eval_probe_priors_missing_report.json`
+- `data/score_eval_probe_priors_full_genes_missing_report.json`
+- `data/score_eval_probe_priors_full_genes_crosswalk_missing_report.json`
+- `data/score_eval_probe_priors_full_genes_omnipath_missing_report.json`
 
 ### 4.4 Coverage scenarios
 For each reference, we evaluate:
@@ -378,8 +377,8 @@ Therefore, reporting should include both assumptions and sensitivity bands, not 
 Run full pipeline:
 
 ```bash
-python market_research/ambitious_paper_questions/proposal_01_partial_label_metric_ceilings/scripts/run_proposal1_paper_pipeline.py
-python market_research/ambitious_paper_questions/proposal_01_partial_label_metric_ceilings/scripts/build_final_paper_markdown.py
+python scripts/run_paper_pipeline.py
+python scripts/build_final_paper_markdown.py
 ```
 
 Core outputs:

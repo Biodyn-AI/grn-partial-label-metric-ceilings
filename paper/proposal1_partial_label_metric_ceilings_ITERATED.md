@@ -148,7 +148,7 @@ Partial-label ceilings clarify what benchmarks can theoretically observe, but th
 ## 8. Data and Code Availability
 All code, analysis scripts, figure-generation pipelines, and configuration files are available at:
 
-[https://github.com/Biodyn-AI/grn-partial-label-metric-ceilings](https://github.com/Biodyn-AI/grn-partial-label-metric-ceilings)
+[https://anonymous.4open.science/r/grn-partial-label-metric-ceilings](https://anonymous.4open.science/r/grn-partial-label-metric-ceilings)
 
 The repository README contains operational instructions for reproducing all main figures and tables.
 

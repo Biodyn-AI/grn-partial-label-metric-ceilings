@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Compute additional low-compute analyses for submission-readiness.
 
-This script augments Proposal 1 outputs with:
+This script augments partial-label ceiling outputs with:
 - uncertainty intervals via stratified bootstrap,
 - external validation summaries from time-series and perturbation artifacts,
 - baseline and confound checks designed for reviewer-facing integrity audits.
@@ -29,7 +29,7 @@ BOOTSTRAP_N = 3000
 def find_repo_root(start: Path) -> Path:
     """Locate repository root by expected domain folders."""
     for candidate in [start] + list(start.parents):
-        if (candidate / "market_research").exists() and (candidate / "network_inference").exists():
+        if (candidate / "data").exists() and (candidate / "scripts").exists():
             return candidate
     raise RuntimeError("Could not infer repository root.")
 
@@ -336,7 +336,7 @@ def build_timeseries_tables(
     repo_root: Path, coverage_table: pd.DataFrame, out_dir: Path
 ) -> tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame]:
     """Reinterpret external time-series metrics through partial-label ceilings."""
-    ts = pd.read_csv(repo_root / "network_inference/outputs/summary_timeseries_metrics.csv").copy()
+    ts = pd.read_csv(repo_root / "data/summary_timeseries_metrics.csv").copy()
     ts["method_family"] = ts["method"].map(method_class)
 
     random_rows = ts[ts["method"].str.contains("random", case=False, regex=False)]
@@ -387,7 +387,7 @@ def build_timeseries_tables(
 
 def build_perturbation_tables(repo_root: Path, out_dir: Path) -> tuple[pd.DataFrame, pd.DataFrame]:
     """Summarize perturbation validation artifact statistics."""
-    payload = json.loads((repo_root / "network_inference/outputs/perturbation_eval_probe.json").read_text())
+    payload = json.loads((repo_root / "data/perturbation_eval_probe.json").read_text())
     recalls = pd.DataFrame(payload["per_perturbation_recall"])
 
     summary = pd.DataFrame(
@@ -702,12 +702,8 @@ def write_submission_summary(
 def main() -> None:
     script = Path(__file__).resolve()
     repo_root = find_repo_root(script)
-    base_dir = (
-        repo_root
-        / "market_research/ambitious_paper_questions/proposal_01_partial_label_metric_ceilings"
-    )
-    tables_dir = base_dir / "outputs/paper/tables"
-    figures_dir = base_dir / "outputs/paper/figures"
+    tables_dir = repo_root / "outputs/paper/tables"
+    figures_dir = repo_root / "outputs/paper/figures"
     rng = np.random.default_rng(RNG_SEED)
 
     central = pd.read_csv(tables_dir / "central_aupr_rows.csv")

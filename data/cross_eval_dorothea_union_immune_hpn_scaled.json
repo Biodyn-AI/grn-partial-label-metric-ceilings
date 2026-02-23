@@ -1,0 +1,12 @@
+{
+  "candidate_edges": 870806,
+  "union_config": "configs/omnipath_signaling_dorothea_union_immune_hpn_scaled.yaml",
+  "hpn": {
+    "aupr": 0.0006771969327898671,
+    "positives": 123
+  },
+  "beeline": {
+    "aupr": 2.770762264895995e-05,
+    "positives": 39
+  }
+}
