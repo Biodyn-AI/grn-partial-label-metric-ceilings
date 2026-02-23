@@ -42,13 +42,6 @@ Under a missing-at-random (MAR) positive-label model, we derive explicit ceiling
 │       ├── tables/           # All supplementary CSV tables (25 files)
 │       ├── figures/          # Publication figures (10 panels)
 │       └── results_summary.md
-└── paper/                    # Manuscript versions and review materials
-    ├── *_SUBMISSION_READY.md # Submission-aligned manuscript
-    ├── *_RESEARCH_PAPER.md   # Full narrative paper
-    ├── *_FINAL.md            # Technical results appendix
-    ├── *_ITERATED.md         # Adversarially revised version
-    ├── paper_quality_gatekeeper_deliverables.md
-    └── iterator_adversarial_revision_deliverables.md
 ```
 
 ## Reproduction
@@ -81,13 +74,6 @@ python scripts/run_submission_readiness_analyses.py
 
 All outputs are written to `outputs/`. Pre-computed outputs are included for convenience.
 
-### Compile PDF from markdown
-
-```bash
-cd paper
-pandoc proposal1_partial_label_metric_ceilings_SUBMISSION_READY.md \
-    --from gfm --pdf-engine=xelatex -V geometry:margin=1in \
-    -o proposal1_partial_label_metric_ceilings_SUBMISSION_READY.pdf
 ```
 
 ## Data description
@@ -118,7 +104,7 @@ Key tables include:
 
 ### Figures (`outputs/paper/figures/`)
 
-10 publication-quality figures covering theoretical curves, empirical reinterpretation, ranking shifts, scenario robustness, synthetic validation, and external validation.
+10 figures covering theoretical curves, empirical reinterpretation, ranking shifts, scenario robustness, synthetic validation, and external validation.
 
 ## Mathematical framework
 
